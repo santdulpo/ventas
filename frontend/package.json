@@ -1,0 +1,30 @@
+{
+  "name": "dulpromax-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para plataforma B2B de alimentos saludables",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "vue": "^3.5.18",
+    "vue-router": "^4.0.13",
+    "pinia": "^2.0.14",
+    "axios": "^1.6.0",
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.0.6",
+    "vite-plugin-vue-devtools": "^8.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.19.2"
+  }
+}
