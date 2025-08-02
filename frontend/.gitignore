@@ -7,24 +7,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
-.DS_Store
+.pnp
+.pnp.js
+
+# Build outputs
 dist
 dist-ssr
-coverage
 *.local
 
-/cypress/videos/
-/cypress/screenshots/
-
-# Editor directories and files
+# Editor directories
 .vscode/*
 !.vscode/extensions.json
 .idea
+.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-*.tsbuildinfo
+# Environment variables (mantener los archivos .env para Netlify)
+# .env
+# .env.local
+# .env.production

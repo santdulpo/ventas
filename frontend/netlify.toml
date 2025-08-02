@@ -1,0 +1,28 @@
+[build]
+  # Directorio donde están los archivos del frontend
+  base = "frontend/"
+  
+  # Comando para hacer build
+  command = "npm run build"
+  
+  # Directorio donde se genera el build
+  publish = "dist/"
+
+[build.environment]
+  # Variables de entorno para el build
+  NODE_VERSION = "18"
+
+[[redirects]]
+  # Redireccionar todas las rutas al index.html para SPA
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  # Headers de seguridad
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
