@@ -3,14 +3,15 @@
   base = "frontend/"
   
   # Comando para hacer build
-  command = "npm run build"
+  command = "npm ci && npm run build"
   
   # Directorio donde se genera el build
   publish = "dist/"
 
 [build.environment]
   # Variables de entorno para el build
-  NODE_VERSION = "18"
+  NODE_VERSION = "18.19.0"
+  NPM_FLAGS = "--prefer-offline --no-audit --no-fund"
 
 [[redirects]]
   # Redireccionar todas las rutas al index.html para SPA
@@ -26,3 +27,9 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  # Headers específicos para archivos JS/CSS
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
