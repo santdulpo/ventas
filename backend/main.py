@@ -24,7 +24,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "¡Bienvenido a DulProMax API!", "status": "success"}
+    return {"message": "¡Bienvenido a DulProMax API!", "status": "success", "version": "1.1.0", "build": "2024-12-19"}
 
 @app.get("/ping")
 async def ping():
