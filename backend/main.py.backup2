@@ -60,33 +60,3 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port) 
-# ===== INTEGRACIÓN CON SUPABASE =====
-from supabase_config import supabase
-
-@app.get("/api/test-supabase")
-async def test_supabase_connection():
-    """Probar conexión con Supabase"""
-    try:
-        # Intentar hacer una consulta simple
-        response = supabase.table("test").select("*").limit(1).execute()
-        return {
-            "status": "success",
-            "message": "Conexión exitosa con Supabase",
-            "supabase_url": supabase.supabase_url,
-            "connected": True
-        }
-    except Exception as e:
-        return {
-            "status": "error", 
-            "message": f"Error conectando con Supabase: {str(e)}",
-            "connected": False
-        }
-
-@app.get("/api/supabase-info")
-async def get_supabase_info():
-    """Información de configuración de Supabase"""
-    return {
-        "supabase_url": supabase.supabase_url,
-        "configured": bool(supabase.supabase_url),
-        "version": "2.8.1"
-    }
