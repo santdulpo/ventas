@@ -2,13 +2,10 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Importar los routers
-from routers import clientes, productos
-
 app = FastAPI(
-    title="DulProMax API B2B",
-    description="API para plataforma B2B de alimentos saludables con segmentación de clientes",
-    version="2.0.0"
+    title="DulProMax API",
+    description="API para plataforma B2B de alimentos saludables",
+    version="1.0.0"
 )
 
 # Configurar CORS
@@ -25,23 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir routers
-app.include_router(clientes.router)
-app.include_router(productos.router)
-
 @app.get("/")
 async def root():
-    return {
-        "message": "¡Bienvenido a DulProMax API B2B!", 
-        "status": "success",
-        "version": "2.0.0",
-        "features": [
-            "Gestión de clientes B2B segmentados",
-            "Catálogo de productos por categorías",
-            "Precios diferenciados por tipo de cliente",
-            "API RESTful completa"
-        ]
-    }
+    return {"message": "¡Bienvenido a DulProMax API!", "status": "success"}
 
 @app.get("/ping")
 async def ping():
@@ -49,27 +32,31 @@ async def ping():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "dulpromax-b2b-api", "version": "2.0.0"}
+    return {"status": "healthy", "service": "dulpromax-api", "version": "1.0.0"}
 
-# Endpoint de estadísticas actualizado
+# Nuevo endpoint para datos de prueba
+@app.get("/api/productos")
+async def get_productos():
+    return {
+        "productos": [
+            {"id": 1, "nombre": "Quinoa Orgánica", "precio": 15.50, "categoria": "granos"},
+            {"id": 2, "nombre": "Aceite de Coco", "precio": 8.99, "categoria": "aceites"},
+            {"id": 3, "nombre": "Miel Pura", "precio": 12.00, "categoria": "endulzantes"}
+        ],
+        "total": 3
+    }
+
 @app.get("/api/stats")
 async def get_stats():
     return {
-        "clientes_registrados": 15,
+        "ventas_mes": 1250,
         "productos_activos": 45,
-        "categorias_productos": 5,
-        "ventas_mes_actual": 1250.50,
-        "pedidos_pendientes": 8,
-        "tipos_cliente": {
-            "tiendas_saludables": 5,
-            "distribuidores": 3,
-            "gimnasios": 4,
-            "cafeterias": 3
-        }
+        "clientes_registrados": 128,
+        "pedidos_pendientes": 8
     }
 
 # Punto de entrada para Render
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port) 
