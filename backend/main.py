@@ -55,11 +55,6 @@ async def get_stats():
         "pedidos_pendientes": 8
     }
 
-# Punto de entrada para Render
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port) 
 # ===== INTEGRACIÓN CON SUPABASE =====
 from supabase_config import supabase
 
@@ -90,3 +85,9 @@ async def get_supabase_info():
         "configured": bool(supabase.supabase_url),
         "version": "2.8.1"
     }
+
+# Punto de entrada para Render
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
