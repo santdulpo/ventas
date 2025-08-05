@@ -250,9 +250,21 @@ onMounted(async () => {
 }
 
 .container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
+}
+
+/* Contenedor con ancho máximo solo para contenido de texto */
+.container.text-content {
+  max-width: 1200px;
+}
+
+/* En pantallas muy grandes, dar más padding */
+@media (min-width: 1400px) {
+  .container {
+    padding: 0 4rem;
+  }
 }
 
 /* Header */
@@ -401,8 +413,16 @@ onMounted(async () => {
 .hero-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: 4rem;
   align-items: center;
+  max-width: none;
+}
+
+/* En pantallas muy grandes, aumentar el gap */
+@media (min-width: 1400px) {
+  .hero-content {
+    gap: 6rem;
+  }
 }
 
 .hero-title {
@@ -530,8 +550,17 @@ onMounted(async () => {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+  max-width: none;
+}
+
+/* En pantallas grandes, limitar a 4 columnas máximo */
+@media (min-width: 1200px) {
+  .features-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+  }
 }
 
 .feature-card {
