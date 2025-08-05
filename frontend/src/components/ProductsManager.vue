@@ -249,14 +249,16 @@
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-else class="empty-state">
+        <!-- Empty State -->
+        <div v-else class="empty-state">
       <div class="empty-icon">📦</div>
       <h3>No hay productos</h3>
       <p>Comienza creando tu primer producto.</p>
       <button @click="showCreateForm" class="btn-primary">
         ➕ Crear Producto
       </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal para Crear/Editar Producto -->

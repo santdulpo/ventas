@@ -512,8 +512,9 @@ onMounted(async () => {
 .section-header {
   text-align: center;
   margin-bottom: 3rem;
+}
+
 .section-header h2 {
-  font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
   color: #1f2937;
