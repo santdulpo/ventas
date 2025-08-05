@@ -339,7 +339,7 @@ onMounted(async () => {
   color: white;
   text-align: center;
   padding: 1.5rem 0;
-}
+  }
 
 .api-info {
   font-size: 0.875rem;
@@ -351,7 +351,7 @@ onMounted(async () => {
   .logo {
     font-size: 2rem;
   }
-  
+
   .welcome-section h2 {
     font-size: 2rem;
   }

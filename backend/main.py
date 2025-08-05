@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routers import categories
 
 app = FastAPI(
     title="DulProMax API",
@@ -22,6 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Incluir routers
+app.include_router(categories.router, prefix="/api/v1")
 @app.get("/")
 async def root():
     return {"message": "¡Bienvenido a DulProMax API!", "status": "success", "version": "1.1.0", "build": "2024-12-19"}
