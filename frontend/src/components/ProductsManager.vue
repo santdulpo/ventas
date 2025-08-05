@@ -1,131 +1,228 @@
 <template>
-  <div class="products-manager">
-    <div class="manager-header">
-      <h2>🛍️ Gestión de Productos</h2>
-      <button @click="showCreateForm" class="btn-primary">
-        ➕ Nuevo Producto
-      </button>
-    </div>
-
-    <!-- Filtros -->
-    <div class="filters-section">
-      <div class="filters-row">
-        <input
-          v-model="filters.search"
-          @input="debouncedSearch"
-          placeholder="🔍 Buscar productos..."
-          class="search-input"
-        />
-        
-        <select v-model="filters.category_id" @change="applyFilters" class="filter-select">
-          <option value="">Todas las categorías</option>
-          <option v-for="category in categories" :key="category.id" :value="category.id">
-            {{ category.name }}
-          </option>
-        </select>
-
-        <select v-model="filters.active_only" @change="applyFilters" class="filter-select">
-          <option :value="true">Solo activos</option>
-          <option :value="false">Todos</option>
-        </select>
-
-        <button @click="clearFilters" class="btn-secondary">
-          🗑️ Limpiar
-        </button>
+  <div class="products-page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="container">
+        <div class="header-content">
+          <div class="header-text">
+            <h1 class="page-title">Gestión de Productos</h1>
+            <p class="page-subtitle">Administra tu catálogo completo de productos saludables</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary" @click="showCreateForm">
+              <span class="btn-icon">➕</span>
+              Nuevo Producto
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <div class="spinner"></div>
-      <p>Cargando productos...</p>
-    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="container">
 
-    <!-- Error State -->
-    <div v-else-if="error" class="error-state">
-      <div class="error-icon">⚠️</div>
-      <h3>Error al cargar productos</h3>
-      <p>{{ error }}</p>
-      <button @click="fetchProducts" class="retry-btn">
-        🔄 Reintentar
-      </button>
-    </div>
+        <!-- Filters Section -->
+        <div class="filters-section">
+          <div class="filters-header">
+            <h2>Filtros y Búsqueda</h2>
+            <span class="results-count" v-if="!loading">
+              {{ pagination.total_items || 0 }} producto{{ (pagination.total_items || 0) !== 1 ? 's' : '' }} encontrado{{ (pagination.total_items || 0) !== 1 ? 's' : '' }}
+            </span>
+          </div>
+          
+          <div class="filters-grid">
+            <div class="filter-group search-group">
+              <label class="filter-label">
+                <span class="label-icon">🔍</span>
+                Búsqueda
+              </label>
+              <input
+                v-model="filters.search"
+                @input="debouncedSearch"
+                placeholder="Buscar por nombre, descripción o SKU..."
+                class="search-input"
+              />
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">🏷️</span>
+                Categoría
+              </label>
+              <select v-model="filters.category_id" @change="applyFilters" class="filter-select">
+                <option value="">Todas las categorías</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
 
-    <!-- Products Table -->
-    <div v-else-if="products.length > 0" class="products-table-container">
-      <table class="products-table">
-        <thead>
-          <tr>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>SKU</th>
-            <th>Categoría</th>
-            <th>Precio Mayorista</th>
-            <th>Stock</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="product in products" :key="product.id" class="product-row">
-            <td>
-              <div class="product-image">
-                <img 
-                  v-if="product.main_image_url" 
-                  :src="product.main_image_url" 
-                  :alt="product.name"
-                  @error="handleImageError"
-                />
-                <div v-else class="image-placeholder">📦</div>
-              </div>
-            </td>
-            <td>
-              <div class="product-name">
-                <strong>{{ product.name }}</strong>
-                <small v-if="product.description">{{ truncateText(product.description, 50) }}</small>
-              </div>
-            </td>
-            <td>
-              <span class="sku">{{ product.sku || '-' }}</span>
-            </td>
-            <td>
-              <span v-if="product.category" class="category-tag">
-                {{ product.category.name }}
-              </span>
-              <span v-else class="no-category">Sin categoría</span>
-            </td>
-            <td>
-              <span class="price">${{ formatPrice(product.price_wholesale) }}</span>
-            </td>
-            <td>
-              <span 
-                class="stock" 
-                :class="{ 'low-stock': product.stock_quantity <= product.min_stock_alert }"
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">⚙️</span>
+                Estado
+              </label>
+              <select v-model="filters.active_only" @change="applyFilters" class="filter-select">
+                <option :value="false">Todos los productos</option>
+                <option :value="true">Solo activos</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">📊</span>
+                Orden
+              </label>
+              <select v-model="filters.sort_by" @change="applyFilters" class="filter-select">
+                <option value="name">Nombre A-Z</option>
+                <option value="-name">Nombre Z-A</option>
+                <option value="price_wholesale">Precio menor</option>
+                <option value="-price_wholesale">Precio mayor</option>
+                <option value="-created_at">Más recientes</option>
+                <option value="created_at">Más antiguos</option>
+              </select>
+            </div>
+            
+            <div class="filter-actions">
+              <button @click="clearFilters" class="btn-secondary">
+                <span class="btn-icon">🗑️</span>
+                Limpiar Filtros
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Cargando productos...</h3>
+            <p>Obteniendo la información más reciente del catálogo</p>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h3>Error al cargar productos</h3>
+            <p>{{ error }}</p>
+            <button @click="fetchProducts" class="btn-secondary">
+              <span class="btn-icon">🔄</span>
+              Reintentar
+            </button>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div v-else-if="products.length > 0" class="products-section">
+          <div class="section-header">
+            <h2>Catálogo de Productos</h2>
+            <div class="view-options">
+              <button 
+                class="view-btn" 
+                :class="{ active: viewMode === 'grid' }"
+                @click="viewMode = 'grid'"
+                title="Vista de tarjetas"
               >
-                {{ product.stock_quantity }}
-              </span>
-            </td>
-            <td>
-              <span 
-                class="status-badge" 
-                :class="{ 'active': product.is_active, 'inactive': !product.is_active }"
+                📊
+              </button>
+              <button 
+                class="view-btn" 
+                :class="{ active: viewMode === 'list' }"
+                @click="viewMode = 'list'"
+                title="Vista de lista"
               >
-                {{ product.is_active ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td>
-              <div class="actions">
-                <button @click="editProduct(product)" class="btn-edit" title="Editar">
-                  ✏️
-                </button>
-                <button @click="confirmDelete(product)" class="btn-delete" title="Eliminar">
-                  🗑️
-                </button>
+                📋
+              </button>
+            </div>
+          </div>
+          
+          <div class="products-grid" :class="{ 'list-view': viewMode === 'list' }">
+            <div 
+              v-for="product in products" 
+              :key="product.id"
+              class="product-card"
+            >
+              <div class="card-header">
+                <div class="product-image">
+                  <img 
+                    v-if="product.main_image_url" 
+                    :src="product.main_image_url" 
+                    :alt="product.name"
+                    @error="handleImageError"
+                  />
+                  <div v-else class="image-placeholder">
+                    📦
+                  </div>
+                </div>
+                <div class="card-actions">
+                  <button class="action-btn" @click="editProduct(product)" title="Editar">
+                    ✏️
+                  </button>
+                  <button class="action-btn danger" @click="confirmDelete(product)" title="Eliminar">
+                    🗑️
+                  </button>
+                </div>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              
+              <div class="card-content">
+                <div class="product-header">
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  <div class="product-status">
+                    <span :class="['status-badge', product.is_active ? 'active' : 'inactive']">
+                      {{ product.is_active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </div>
+                </div>
+                
+                <p class="product-description">{{ product.description || 'Sin descripción' }}</p>
+                
+                <div class="product-meta">
+                  <div class="meta-item">
+                    <span class="meta-label">SKU:</span>
+                    <span class="meta-value sku">{{ product.sku || '-' }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Categoría:</span>
+                    <span v-if="product.category" class="meta-value category-tag">
+                      {{ product.category.name }}
+                    </span>
+                    <span v-else class="meta-value no-category">Sin categoría</span>
+                  </div>
+                </div>
+                
+                <div class="product-pricing">
+                  <div class="price-item">
+                    <span class="price-label">Precio Mayorista</span>
+                    <span class="price-value">${{ formatPrice(product.price_wholesale) }}</span>
+                  </div>
+                  <div class="stock-item">
+                    <span class="stock-label">Stock</span>
+                    <span 
+                      class="stock-value" 
+                      :class="{ 'low-stock': product.stock_quantity <= product.min_stock_alert }"
+                    >
+                      {{ product.stock_quantity }}
+                      <small v-if="product.stock_quantity <= product.min_stock_alert">(Bajo)</small>
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="product-footer">
+                  <span class="created-date">
+                    Creado: {{ formatDate(product.created_at) }}
+                  </span>
+                  <div class="product-actions">
+                    <button class="btn-view" @click="viewProduct(product)">
+                      Ver Detalles
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
       <!-- Paginación -->
       <div v-if="pagination.total_pages > 1" class="pagination">
@@ -363,6 +460,7 @@ const showModal = ref(false)
 const showDeleteModal = ref(false)
 const editingProduct = ref(null)
 const productToDelete = ref(null)
+const viewMode = ref('grid') // 'grid' or 'list'
 const saving = ref(false)
 const deleting = ref(false)
 
@@ -549,6 +647,21 @@ const formatPrice = (price) => {
   }).format(price)
 }
 
+const viewProduct = (product) => {
+  // Función para ver detalles del producto (puede abrir modal o navegar)
+  console.log('Ver detalles del producto:', product)
+  // Por ahora solo editamos el producto
+  editProduct(product)
+}
+
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
 const truncateText = (text, maxLength) => {
   if (!text) return ''
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
@@ -596,56 +709,63 @@ onMounted(() => {
 .filters-row {
   display: flex;
   gap: 1rem;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary, .btn-view {
+  display: flex;
   align-items: center;
-  flex-wrap: wrap;
-}
-
-.search-input {
-  flex: 1;
-  min-width: 250px;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-.filter-select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  min-width: 150px;
-}
-
-/* Botones */
-.btn-primary {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
 }
 
 .btn-secondary {
-  background: #95a5a6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  background: white;
+  color: #059669;
+  border: 2px solid #059669;
 }
 
 .btn-secondary:hover {
-  background: #7f8c8d;
+  background: #059669;
+  color: white;
+}
+
+.btn-view {
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.btn-view:hover {
+  background: #e5e7eb;
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+/* Main Content */
+.main-content {
+  padding: 2rem 0;
 }
 
 .btn-danger {
