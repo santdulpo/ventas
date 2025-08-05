@@ -1,24 +1,20 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import apiService from './services/api.js'
-import ConnectionTest from './components/ConnectionTest.vue'
+import { apiService } from './services/api.js'
+import CategoriesList from './components/CategoriesList.vue'
 
 // Estados reactivos
 const isConnected = ref(false)
-const connectionStatus = ref('Conectando...')
-const backendData = ref(null)
-const productos = ref([])
-const stats = ref(null)
-const loading = ref(true)
+const connectionStatus = ref('Verificando conexión...')
+const currentView = ref('home') // 'home', 'categories'
 
 // Función para verificar conexión con el backend
 async function checkConnection() {
   try {
-    const response = await apiService.getHealth()
+    const response = await apiService.testConnection()
     if (response.status === 'healthy') {
       isConnected.value = true
       connectionStatus.value = '✅ Conectado al Backend'
-      backendData.value = response
     }
   } catch (error) {
     isConnected.value = false
@@ -27,32 +23,18 @@ async function checkConnection() {
   }
 }
 
-// Función para cargar datos de ejemplo
-async function loadData() {
-  try {
-    // Cargar productos
-    const productosData = await apiService.getProductos()
-    productos.value = productosData.productos
+// Navegación
+const showCategories = () => {
+  currentView.value = 'categories'
+}
 
-    // Cargar estadísticas
-    const statsData = await apiService.getStats()
-    stats.value = statsData
-
-  } catch (error) {
-    console.error('Error loading data:', error)
-  } finally {
-    loading.value = false
-  }
+const showHome = () => {
+  currentView.value = 'home'
 }
 
 // Ejecutar al montar el componente
 onMounted(async () => {
   await checkConnection()
-  if (isConnected.value) {
-    await loadData()
-  } else {
-    loading.value = false
-  }
 })
 </script>
 
@@ -67,83 +49,82 @@ onMounted(async () => {
         <div class="connection-status" :class="{ 'connected': isConnected, 'disconnected': !isConnected }">
           {{ connectionStatus }}
         </div>
-    </div>
-  </header>
+
+        <!-- Navegación -->
+        <nav class="main-nav" v-if="isConnected">
+          <button 
+            @click="showHome" 
+            :class="{ 'active': currentView === 'home' }"
+            class="nav-btn"
+          >
+            🏠 Inicio
+          </button>
+          <button 
+            @click="showCategories" 
+            :class="{ 'active': currentView === 'categories' }"
+            class="nav-btn"
+          >
+            🏷️ Categorías
+          </button>
+        </nav>
+      </div>
+    </header>
 
     <main class="app-main">
       <div class="container">
-        <div class="welcome-section">
-          <h2>¡Bienvenido a DulProMax!</h2>
-          <p>Tu socio tecnológico para el crecimiento de tu negocio de alimentos saludables.</p>
-          
-          <!-- Estadísticas del Dashboard -->
-          <div v-if="isConnected && stats" class="stats-grid">
-            <div class="stat-card">
-              <h3>💰 Ventas del Mes</h3>
-              <p class="stat-number">${{ stats.ventas_mes.toLocaleString() }}</p>
-            </div>
-            <div class="stat-card">
-              <h3>📦 Productos Activos</h3>
-              <p class="stat-number">{{ stats.productos_activos }}</p>
-            </div>
-            <div class="stat-card">
-              <h3>👥 Clientes</h3>
-              <p class="stat-number">{{ stats.clientes_registrados }}</p>
-            </div>
-            <div class="stat-card">
-              <h3>📋 Pedidos Pendientes</h3>
-              <p class="stat-number">{{ stats.pedidos_pendientes }}</p>
-            </div>
-          </div>
-
-          <!-- Productos de ejemplo -->
-          <div v-if="isConnected && productos.length > 0" class="productos-section">
-            <h3>🛒 Productos Destacados</h3>
-            <div class="productos-grid">
-              <div v-for="producto in productos" :key="producto.id" class="producto-card">
-                <h4>{{ producto.nombre }}</h4>
-                <p class="precio">${{ producto.precio }}</p>
-                <span class="categoria">{{ producto.categoria }}</span>
+        <!-- Vista Home -->
+        <div v-if="currentView === 'home'" class="home-view">
+          <div class="welcome-section">
+            <h2>¡Bienvenido a DulProMax!</h2>
+            <p>Tu socio tecnológico para el crecimiento de tu negocio de alimentos saludables.</p>
+            
+            <div class="features-grid">
+              <div class="feature-card" @click="showCategories">
+                <h3>🏷️ Catálogo</h3>
+                <p>Explora nuestras categorías de productos saludables</p>
+                <span class="cta">Ver Categorías →</span>
+              </div>
+              <div class="feature-card">
+                <h3>📊 Gestión</h3>
+                <p>Control de inventario y ventas en tiempo real</p>
+                <span class="coming-soon">Próximamente</span>
+              </div>
+              <div class="feature-card">
+                <h3>📱 Pedidos</h3>
+                <p>Sistema de pedidos B2B optimizado</p>
+                <span class="coming-soon">Próximamente</span>
+              </div>
+              <div class="feature-card">
+                <h3>🚀 Analytics</h3>
+                <p>Reportes y análisis de ventas</p>
+                <span class="coming-soon">Próximamente</span>
               </div>
             </div>
           </div>
-          
-          <div class="features-grid">
-            <div class="feature-card">
-              <h3>🛒 E-commerce</h3>
-              <p>Tienda online personalizada para tu negocio</p>
-            </div>
-            <div class="feature-card">
-              <h3>📊 Gestión</h3>
-              <p>Control de inventario y ventas en tiempo real</p>
-            </div>
-            <div class="feature-card">
-              <h3>📱 Marketing</h3>
-              <p>Herramientas digitales para fidelizar clientes</p>
-            </div>
-            <div class="feature-card">
-              <h3>🚀 Crecimiento</h3>
-              <p>Escala tu negocio con tecnología moderna</p>
-            </div>
-          </div>
+        </div>
 
-          <!-- Loading state -->
-          <div v-if="loading" class="loading">
-            <p>⏳ Cargando datos...</p>
-          </div>
+        <!-- Vista Categorías -->
+        <div v-else-if="currentView === 'categories'">
+          <CategoriesList />
+        </div>
 
-          <!-- Componente de prueba de conexión (solo se muestra si hay problemas) -->
-          <ConnectionTest v-if="!isConnected" />
+        <!-- Error de conexión -->
+        <div v-if="!isConnected" class="connection-error">
+          <div class="error-content">
+            <h2>⚠️ Error de Conexión</h2>
+            <p>No se pudo conectar con el servidor. Por favor, verifica tu conexión e intenta nuevamente.</p>
+            <button @click="checkConnection" class="retry-btn">
+              🔄 Reintentar Conexión
+            </button>
+          </div>
         </div>
       </div>
-  </main>
+    </main>
 
     <footer class="app-footer">
       <div class="container">
         <p>&copy; 2024 DulProMax. Todos los derechos reservados.</p>
-        <p v-if="backendData" class="api-info">
-          API: {{ backendData.service }} v{{ backendData.version }}
-        </p>
+        <p class="version-info">Versión 1.0.0 - Catálogo B2B</p>
       </div>
     </footer>
   </div>
@@ -197,6 +178,38 @@ onMounted(async () => {
 .connection-status.disconnected {
   background-color: rgba(245, 101, 101, 0.2);
   border: 2px solid #f56565;
+}
+
+/* Navegación */
+.main-nav {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.nav-btn.active {
+  background: white;
+  color: #667eea;
+  border-color: white;
 }
 
 .app-main {
@@ -311,6 +324,8 @@ onMounted(async () => {
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  cursor: pointer;
+  position: relative;
 }
 
 .feature-card:hover {
@@ -326,6 +341,24 @@ onMounted(async () => {
 .feature-card p {
   color: #666;
   line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.cta {
+  color: #667eea;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.coming-soon {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }
 
 .loading {
@@ -334,14 +367,57 @@ onMounted(async () => {
   margin: 2rem 0;
 }
 
+/* Error de conexión */
+.connection-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.error-content {
+  text-align: center;
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.error-content h2 {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+.error-content p {
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.retry-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.retry-btn:hover {
+  background: #2980b9;
+}
+
 .app-footer {
   background-color: #333;
   color: white;
   text-align: center;
   padding: 1.5rem 0;
-  }
+}
 
-.api-info {
+.version-info {
   font-size: 0.875rem;
   opacity: 0.7;
   margin-top: 0.5rem;

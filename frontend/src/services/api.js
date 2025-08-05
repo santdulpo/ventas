@@ -1,59 +1,58 @@
 // Servicio API para DulProMax
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ventas-bfzl.onrender.com'
+import axios from 'axios'
 
-class ApiService {
-  constructor() {
-    this.baseURL = API_BASE_URL
-    console.log('🔗 API Service inicializado con URL:', this.baseURL)
+// Configuración base de la API
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dulpromax-backend.onrender.com'
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
   }
+})
 
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`
-    
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    }
+// Interceptor para manejo de errores
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error)
+    return Promise.reject(error)
+  }
+)
 
+// Servicios de la API
+export const apiService = {
+  // Test de conexión
+  async testConnection() {
     try {
-      const response = await fetch(url, config)
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      return await response.json()
+      const response = await api.get('/health')
+      return response.data
     } catch (error) {
-      console.error('API Error:', error)
-      throw error
+      throw new Error(`Error de conexión: ${error.message}`)
     }
-  }
+  },
 
-  // Endpoints específicos
-  async getWelcome() {
-    return this.request('/')
-  }
+  // === CATEGORÍAS ===
+  async getCategories(activeOnly = true) {
+    try {
+      const response = await api.get('/api/v1/categories', {
+        params: { active_only: activeOnly }
+      })
+      return response.data
+    } catch (error) {
+      throw new Error(`Error al obtener categorías: ${error.message}`)
+    }
+  },
 
-  async ping() {
-    return this.request('/ping')
-  }
-
-  async getHealth() {
-    return this.request('/health')
-  }
-
-  async getProductos() {
-    return this.request('/api/productos')
-  }
-
-  async getStats() {
-    return this.request('/api/stats')
+  async getCategory(categoryId) {
+    try {
+      const response = await api.get(`/api/v1/categories/${categoryId}`)
+      return response.data
+    } catch (error) {
+      throw new Error(`Error al obtener categoría: ${error.message}`)
+    }
   }
 }
 
-// Exportar instancia única
-export const apiService = new ApiService()
 export default apiService
