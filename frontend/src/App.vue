@@ -192,25 +192,24 @@ onMounted(async () => {
         </section>
       </div>
 
-        <!-- Vista Categorías -->
-        <div v-else-if="currentView === 'categories'">
-          <CategoriesList />
-        </div>
+      <!-- Vista Categorías -->
+      <div v-else-if="currentView === 'categories'">
+        <CategoriesList />
+      </div>
 
-        <!-- Vista Productos -->
-        <div v-else-if="currentView === 'products'">
-          <ProductsManager />
-        </div>
+      <!-- Vista Productos -->
+      <div v-else-if="currentView === 'products'">
+        <ProductsManager />
+      </div>
 
-        <!-- Error de conexión -->
-        <div v-if="!isConnected" class="connection-error">
-          <div class="error-content">
-            <h2>⚠️ Error de Conexión</h2>
-            <p>No se pudo conectar con el servidor. Por favor, verifica tu conexión e intenta nuevamente.</p>
-            <button @click="checkConnection" class="retry-btn">
-              🔄 Reintentar Conexión
-            </button>
-          </div>
+      <!-- Error de conexión -->
+      <div v-if="!isConnected" class="connection-error">
+        <div class="error-content">
+          <h2>⚠️ Error de Conexión</h2>
+          <p>No se pudo conectar con el servidor. Por favor, verifica tu conexión e intenta nuevamente.</p>
+          <button @click="checkConnection" class="retry-btn">
+            🔄 Reintentar Conexión
+          </button>
         </div>
       </div>
     </main>
