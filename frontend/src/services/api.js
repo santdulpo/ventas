@@ -52,6 +52,52 @@ export const apiService = {
     } catch (error) {
       throw new Error(`Error al obtener categoría: ${error.message}`)
     }
+  },
+
+  // === PRODUCTOS ===
+  async getProducts(params = {}) {
+    try {
+      const response = await api.get('/api/v1/products', { params })
+      return response.data
+    } catch (error) {
+      throw new Error(`Error al obtener productos: ${error.message}`)
+    }
+  },
+
+  async getProduct(productId) {
+    try {
+      const response = await api.get(`/api/v1/products/${productId}`)
+      return response.data
+    } catch (error) {
+      throw new Error(`Error al obtener producto: ${error.message}`)
+    }
+  },
+
+  async createProduct(productData) {
+    try {
+      const response = await api.post('/api/v1/products', productData)
+      return response.data
+    } catch (error) {
+      throw new Error(`Error al crear producto: ${error.message}`)
+    }
+  },
+
+  async updateProduct(productId, productData) {
+    try {
+      const response = await api.put(`/api/v1/products/${productId}`, productData)
+      return response.data
+    } catch (error) {
+      throw new Error(`Error al actualizar producto: ${error.message}`)
+    }
+  },
+
+  async deleteProduct(productId) {
+    try {
+      await api.delete(`/api/v1/products/${productId}`)
+      return true
+    } catch (error) {
+      throw new Error(`Error al eliminar producto: ${error.message}`)
+    }
   }
 }
 

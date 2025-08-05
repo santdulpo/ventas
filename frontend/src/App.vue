@@ -2,11 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { apiService } from './services/api.js'
 import CategoriesList from './components/CategoriesList.vue'
+import ProductsManager from './components/ProductsManager.vue'
 
 // Estados reactivos
 const isConnected = ref(false)
 const connectionStatus = ref('Verificando conexión...')
-const currentView = ref('home') // 'home', 'categories'
+const currentView = ref('home') // 'home', 'categories', 'products'
 
 // Función para verificar conexión con el backend
 async function checkConnection() {
@@ -26,6 +27,10 @@ async function checkConnection() {
 // Navegación
 const showCategories = () => {
   currentView.value = 'categories'
+}
+
+const showProducts = () => {
+  currentView.value = 'products'
 }
 
 const showHome = () => {
@@ -66,6 +71,13 @@ onMounted(async () => {
           >
             🏷️ Categorías
           </button>
+          <button 
+            @click="showProducts" 
+            :class="{ 'active': currentView === 'products' }"
+            class="nav-btn"
+          >
+            📦 Productos
+          </button>
         </nav>
       </div>
     </header>
@@ -80,14 +92,14 @@ onMounted(async () => {
             
             <div class="features-grid">
               <div class="feature-card" @click="showCategories">
-                <h3>🏷️ Catálogo</h3>
-                <p>Explora nuestras categorías de productos saludables</p>
-                <span class="cta">Ver Categorías →</span>
+                <h3>🏷️ Categorías</h3>
+                <p>Gestiona las categorías de productos saludables</p>
+                <span class="cta">Gestionar Categorías →</span>
               </div>
-              <div class="feature-card">
-                <h3>📊 Gestión</h3>
-                <p>Control de inventario y ventas en tiempo real</p>
-                <span class="coming-soon">Próximamente</span>
+              <div class="feature-card" @click="showProducts">
+                <h3>📦 Productos</h3>
+                <p>Catálogo completo con CRUD de productos</p>
+                <span class="cta">Gestionar Productos →</span>
               </div>
               <div class="feature-card">
                 <h3>📱 Pedidos</h3>
@@ -106,6 +118,11 @@ onMounted(async () => {
         <!-- Vista Categorías -->
         <div v-else-if="currentView === 'categories'">
           <CategoriesList />
+        </div>
+
+        <!-- Vista Productos -->
+        <div v-else-if="currentView === 'products'">
+          <ProductsManager />
         </div>
 
         <!-- Error de conexión -->
